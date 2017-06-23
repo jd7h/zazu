@@ -41,7 +41,7 @@ def main():
     logfilename = config.get('general','log_file_name')
 
     # enable logging
-    logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',filename=logfilename,level=config.get('general','log_level')
+    logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',filename=logfilename,level=config.get('general','log_level'))
 
     tweettext = ""
     while(not isValidTweet(tweettext) and not isEmpty(sourcefilename)):
