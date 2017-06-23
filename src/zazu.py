@@ -4,6 +4,7 @@ import configparser
 import twitter
 import random
 import time
+import os
 
 SOURCEFILENAME = "tweets.txt"
 LOGFILENAME = "zazu.log"
