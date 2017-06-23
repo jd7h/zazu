@@ -17,9 +17,11 @@ def isValidTweet(text):
         relative_length = relative_length + 23 - len(match)
     return relative_length <= 140 and relative_length > 0
 
+
 def isEmpty(filename):
-    filestat = os.stat(filename)
-    return filestat.st_size == 0
+    """Return True if `filename` is empty, otherwise False"""
+    statinfo = os.stat(filename)
+    return statinfo.st_size == 0
 
 def getApi(config)
     api = twitter.Api(
@@ -50,7 +52,7 @@ def main():
         # read the tail of the source file, close the file
         sourcefile_tail = sourcefile.read()
         sourcefile.close()
-        
+
         # process tweet
         if isValidTweet(tweettext):
             logging.info("Valid tweet text: \"%s\"", tweettext)
@@ -74,11 +76,11 @@ def main():
                 return # do not update the source file
             logging.info("tweeted %s at %s",post_update.text,post_update.created_at)
             logging.debug("full post_update info: %s",str(post_update))
-            
+
         else:
             logging.error("\"%s\" is not a valid tweet",tweettext)
             print("\"" + tweettext + "\"","is an unvalid tweet text")
-        
+
         # update source file
         sourcefile = open(sourcefilename,"w")
         sourcefile.write(sourcefile_tail)
