@@ -1,9 +1,11 @@
 #!/usr/bin/python
-import logging
 import configparser
-import twitter
+import logging
+import os
 import random
+import stat
 import time
+import twitter
 
 SOURCEFILENAME = "tweets.txt"
 LOGFILENAME = "zazu.log"
@@ -17,13 +19,12 @@ def isValidTweet(text):
     text = text.strip()
     return len(text) <= 140 and len(text) > 0
 
-# there must be a better way to do this
+
 def isEmpty(filename):
-    with open(filename,"r") as infile:
-        filelength = len(infile.read())
-    if filelength < 1:
-        logging.info("file %s has length < 1",filename)
-    return filelength < 1
+    """Return True if `filename` is empty, otherwise False"""
+    statinfo = os.stat(filename)
+    return statinfo.st_size == 0
+
 
 def get_api():
     CONFIG = configparser.ConfigParser()
