@@ -7,11 +7,7 @@ import time
 import os
 import re
 
-SOURCEFILENAME = "tweets.txt"
-LOGFILENAME = "zazu.log"
-LOGLEVEL = logging.DEBUG
 CONFIGFILE = "sampleconfig.txt"
-RANDOMTIME = 5 * 60 # 5 minutes
 
 def isValidTweet(text):
     text = text.strip()
@@ -21,28 +17,33 @@ def isValidTweet(text):
     return relative_length <= 140 and relative_length > 0
 
 def isEmpty(filename):
-    filestat = os.stat(SOURCEFILENAME)
+    filestat = os.stat(filename)
     return filestat.st_size == 0
 
-def get_api():
-    CONFIG = configparser.ConfigParser()
-    CONFIG.read(CONFIGFILE)
+def getApi(config)
     api = twitter.Api(
-        consumer_key=CONFIG.get('api', 'consumer_key'),
-        consumer_secret=CONFIG.get('api', 'consumer_secret'),
-        access_token_key=CONFIG.get('api', 'access_token_key'),
-        access_token_secret=CONFIG.get('api', 'access_token_secret')
+        consumer_key=config.get('api', 'consumer_key'),
+        consumer_secret=config.get('api', 'consumer_secret'),
+        access_token_key=config.get('api', 'access_token_key'),
+        access_token_secret=config.get('api', 'access_token_secret')
     )
     return api
 
 def main():
+    # read configfile
+    config = configparser.ConfigParser()
+    config.read(CONFIGFILE)
+
+    sourcefilename = config.get('general','source_file_name')
+    logfilename = config.get('general','log_file_name')
+
     # enable logging
-    logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',filename=LOGFILENAME,level=LOGLEVEL)
+    logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',filename=logfilename,level=config.get('general','log_level')
 
     tweettext = ""
-    while(not isValidTweet(tweettext) and not isEmpty(SOURCEFILENAME)):
+    while(not isValidTweet(tweettext) and not isEmpty(sourcefilename)):
         # open linefile, read first line
-        sourcefile = open(SOURCEFILENAME,"r")
+        sourcefile = open(sourcefilename,"r")
         tweettext = sourcefile.readline().strip()
 
         # read the tail of the source file, close the file
@@ -54,7 +55,7 @@ def main():
             logging.info("Valid tweet text: \"%s\"", tweettext)
             print(tweettext)
             try:
-                api = get_api()
+                api = getApi(config)
                 api.VerifyCredentials()
             except twitter.error.TwitterError as error:
                 logging.error("TwitterError: %s",error)
@@ -62,7 +63,7 @@ def main():
             except Exception as error:
                 logging.error("%s: %s",type(error),error)
                 return # do not update the source file
-            randomtime = random.randrange(0,RANDOMTIME)
+            randomtime = random.randrange(0,config.get('general','random_time'))
             logging.info("sleeping for %d seconds (%.2f minutes) before posting tweet",randomtime,randomtime / 60)
             time.sleep(randomtime)
             try:
@@ -78,6 +79,6 @@ def main():
             print("\"" + tweettext + "\"","is an unvalid tweet text")
         
         # update source file
-        sourcefile = open(SOURCEFILENAME,"w")
+        sourcefile = open(sourcefilename,"w")
         sourcefile.write(sourcefile_tail)
         sourcefile.close()
