@@ -23,7 +23,7 @@ def isEmpty(filename):
     statinfo = os.stat(filename)
     return statinfo.st_size == 0
 
-def getApi(config)
+def getApi(config):
     api = twitter.Api(
         consumer_key=config.get('api', 'consumer_key'),
         consumer_secret=config.get('api', 'consumer_secret'),
