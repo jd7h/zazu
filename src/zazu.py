@@ -5,6 +5,7 @@ import twitter
 import random
 import time
 import os
+import re
 
 SOURCEFILENAME = "tweets.txt"
 LOGFILENAME = "zazu.log"
@@ -12,11 +13,12 @@ LOGLEVEL = logging.DEBUG
 CONFIGFILE = "sampleconfig.txt"
 RANDOMTIME = 5 * 60 # 5 minutes
 
-# stub
-# todo: account for links
 def isValidTweet(text):
     text = text.strip()
-    return len(text) <= 140 and len(text) > 0
+    relative_length = len(text)
+    for match in re.findall("https?://[\S]*",text):
+        relative_length = relative_length + 23 - len(match)
+    return relative_length <= 140 and relative_length > 0
 
 def isEmpty(filename):
     filestat = os.stat(SOURCEFILENAME)
