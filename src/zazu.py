@@ -11,6 +11,17 @@ import re
 CONFIGFILE = "sampleconfig.txt"
 
 def isValidTweet(text):
+    """
+    >>> isValidTweet("Hoi dit is een test")
+    True
+    >>> isValidTweet("LONG "* 100 + "TWEET")
+    False
+    >>> isValidTweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 7)
+    False
+    >>> isValidTweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 5)
+    True
+    """
+
     text = text.strip()
     relative_length = len(text)
     for match in re.findall("https?://[\S]*",text):
