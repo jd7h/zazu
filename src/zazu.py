@@ -17,13 +17,9 @@ def isValidTweet(text):
     text = text.strip()
     return len(text) <= 140 and len(text) > 0
 
-# there must be a better way to do this
 def isEmpty(filename):
-    with open(filename,"r") as infile:
-        filelength = len(infile.read())
-    if filelength < 1:
-        logging.info("file %s has length < 1",filename)
-    return filelength < 1
+    filestat = os.stat(SOURCEFILENAME)
+    return filestat.st_size == 0
 
 def get_api():
     CONFIG = configparser.ConfigParser()
