@@ -1,11 +1,11 @@
 #!/usr/bin/python
-import configparser
 import logging
-import os
-import random
-import stat
-import time
+import configparser
 import twitter
+import random
+import time
+import os
+import re
 
 SOURCEFILENAME = "tweets.txt"
 LOGFILENAME = "zazu.log"
@@ -13,11 +13,12 @@ LOGLEVEL = logging.DEBUG
 CONFIGFILE = "sampleconfig.txt"
 RANDOMTIME = 5 * 60 # 5 minutes
 
-# stub
-# todo: account for links
 def isValidTweet(text):
     text = text.strip()
-    return len(text) <= 140 and len(text) > 0
+    relative_length = len(text)
+    for match in re.findall("https?://[\S]*",text):
+        relative_length = relative_length + 23 - len(match)
+    return relative_length <= 140 and relative_length > 0
 
 
 def isEmpty(filename):
@@ -50,7 +51,7 @@ def main():
         # read the tail of the source file, close the file
         sourcefile_tail = sourcefile.read()
         sourcefile.close()
-        
+
         # process tweet
         if isValidTweet(tweettext):
             logging.info("Valid tweet text: \"%s\"", tweettext)
@@ -74,11 +75,11 @@ def main():
                 return # do not update the source file
             logging.info("tweeted %s at %s",post_update.text,post_update.created_at)
             logging.debug("full post_update info: %s",str(post_update))
-            
+
         else:
             logging.error("\"%s\" is not a valid tweet",tweettext)
             print("\"" + tweettext + "\"","is an unvalid tweet text")
-        
+
         # update source file
         sourcefile = open(SOURCEFILENAME,"w")
         sourcefile.write(sourcefile_tail)
