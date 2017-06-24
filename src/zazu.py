@@ -80,7 +80,6 @@ def main():
         # process tweet
         if isValidTweet(tweettext):
             logging.info("Valid tweet text: \"%s\"", tweettext)
-            print(tweettext)
             try:
                 api = getApi(config)
                 api.VerifyCredentials()
@@ -103,7 +102,6 @@ def main():
 
         else:
             logging.error("\"%s\" is not a valid tweet",tweettext)
-            print("\"" + tweettext + "\"","is an unvalid tweet text")
 
         # update source file
         sourcefile = open(sourcefilename,"w")
