@@ -30,7 +30,13 @@ def isValidTweet(text):
 
 
 def isEmpty(filename):
-    """Return True if `filename` is empty, otherwise False"""
+    """Return True if `filename` is empty, otherwise False
+
+    >>> zazu.isEmpty("../tests/emptyfile.txt")
+    True
+    >>> zazu.isEmpty("../tests/badtweets.txt")
+    False
+    """
     statinfo = os.stat(filename)
     return statinfo.st_size == 0
 
