@@ -102,3 +102,6 @@ def main():
         sourcefile = open(sourcefilename,"w")
         sourcefile.write(sourcefile_tail)
         sourcefile.close()
+
+if __name__ == "__main__":
+    main()
