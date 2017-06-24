@@ -47,6 +47,9 @@ def getApi(config):
         access_token_key=config.get('api', 'access_token_key'),
         access_token_secret=config.get('api', 'access_token_secret')
     )
+    user = api.VerifyCredentials()
+    logging.info("running with valid api credentials \
+                  for user %s (%s)", user.name, user.screen_name)
     return api
 
 def main():
