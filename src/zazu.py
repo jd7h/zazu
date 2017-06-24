@@ -53,6 +53,10 @@ def getApi(config):
     return api
 
 def main():
+    # check for configfile
+    if isEmpty(CONFIGFILE):
+        raise ValueError("The configuration file " + CONFIGFILE + " is empty")
+
     # read configfile
     config = configparser.ConfigParser()
     config.read(CONFIGFILE)
