@@ -8,7 +8,7 @@ import time
 import os
 import re
 
-CONFIGFILE = "sampleconfig.txt"
+CONFIGFILE = "config.txt"
 
 def isValidTweet(text):
     """
