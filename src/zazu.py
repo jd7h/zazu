@@ -88,7 +88,7 @@ def main():
             except Exception as error:
                 logging.error("%s: %s",type(error),error)
                 return # do not update the source file
-            randomtime = random.randrange(0,config.get('general','random_time'))
+            randomtime = random.randrange(0,int(config.get('general','random_time')))
             logging.info("sleeping for %d seconds (%.2f minutes) before posting tweet",randomtime,randomtime / 60)
             time.sleep(randomtime)
             try:
