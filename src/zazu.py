@@ -7,6 +7,7 @@ import random
 import time
 import os
 import re
+import sys
 
 CONFIGFILE = "config.txt"
 
@@ -51,20 +52,47 @@ def getApi(config):
     logging.info("running with valid api credentials for user %s (%s)", user.name, user.screen_name)
     return api
 
-def main():
+def process_config(config_location):
     # check for configfile
-    if isEmpty(CONFIGFILE):
-        raise ValueError("The configuration file " + CONFIGFILE + " is empty")
+    if isEmpty(config_location):
+        raise ValueError("The configuration file " + config_location + " is empty")
 
     # read configfile
     config = configparser.ConfigParser()
-    config.read(CONFIGFILE)
+    config.read(config_location)
+    return config
 
-    sourcefilename = config.get('general','source_file_name')
+def enable_logging(config):
     logfilename = config.get('general','log_file_name')
-
-    # enable logging
     logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',filename=logfilename,level=config.get('general','log_level'))
+    
+def post_tweet(config,tweettext):
+    try:
+        api = getApi(config)
+        api.VerifyCredentials()
+    except twitter.error.TwitterError as error:
+        logging.error("TwitterError: %s",error)
+        sys.exit(1) # do not update the source file
+    except Exception as error:
+        logging.error("%s: %s",type(error),error)
+        sys.exit(1) # do not update the source file
+    randomtime = 60 * random.randrange(0,int(config.get('general','random_time')))
+    logging.info("sleeping for %d seconds (%.2f minutes) before posting tweet",randomtime,randomtime / 60)
+    time.sleep(randomtime)
+    try:
+        post_update = api.PostUpdate(tweettext,trim_user=True,verify_status_length=True)
+    except Exception as error:
+        logging.error("%s: %s",type(error),error)
+        sys.exit(1) # do not update the source file
+    logging.info("tweeted %s at %s",post_update.text,post_update.created_at)
+    logging.debug("full post_update info: %s",str(post_update))
+    return post_update
+
+def main():
+    config = process_config(CONFIGFILE)
+    enable_logging(config)
+    
+    sourcefilename = config.get('general','source_file_name')
 
     tweettext = ""
     while(not isValidTweet(tweettext) and not isEmpty(sourcefilename)):
@@ -79,26 +107,7 @@ def main():
         # process tweet
         if isValidTweet(tweettext):
             logging.info("Valid tweet text: \"%s\"", tweettext)
-            try:
-                api = getApi(config)
-                api.VerifyCredentials()
-            except twitter.error.TwitterError as error:
-                logging.error("TwitterError: %s",error)
-                return # do not update the source file
-            except Exception as error:
-                logging.error("%s: %s",type(error),error)
-                return # do not update the source file
-            randomtime = random.randrange(0,int(config.get('general','random_time')))
-            logging.info("sleeping for %d seconds (%.2f minutes) before posting tweet",randomtime,randomtime / 60)
-            time.sleep(randomtime)
-            try:
-                post_update = api.PostUpdate(tweettext,trim_user=True,verify_status_length=True)
-            except Exception as error:
-                logging.error("%s: %s",type(error),error)
-                return # do not update the source file
-            logging.info("tweeted %s at %s",post_update.text,post_update.created_at)
-            logging.debug("full post_update info: %s",str(post_update))
-
+            post_update = post_tweet(config,tweettext)
         else:
             logging.error("\"%s\" is not a valid tweet",tweettext)
 
