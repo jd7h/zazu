@@ -69,7 +69,6 @@ def enable_logging(config):
 def post_tweet(config,tweettext):
     try:
         api = getApi(config)
-        api.VerifyCredentials()
     except twitter.error.TwitterError as error:
         logging.error("TwitterError: %s",error)
         sys.exit(1) # do not update the source file
