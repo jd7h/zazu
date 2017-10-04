@@ -64,12 +64,14 @@ def process_config(config_location):
     return config
 
 def enable_logging(config):
+    """enable_logging"""
     logfilename = config.get('general', 'log_file_name')
     logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',
                         filename=logfilename,
                         level=config.get('general', 'log_level'))
 
 def post_tweet(config, tweettext):
+    """post_tweet"""
     try:
         api = get_api(config)
     except twitter.error.TwitterError as error:
