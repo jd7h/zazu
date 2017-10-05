@@ -1,47 +1,47 @@
 #!/usr/bin/env python3
-
-import logging
-import configparser
-import twitter
 import random
 import time
 import os
 import re
 import sys
+import logging
+import configparser
+import twitter
 
 CONFIGFILE = "config.txt"
 
-def isValidTweet(text):
+def is_valid_tweet(text):
     """
-    >>> isValidTweet("Hoi dit is een test")
+    >>> is_valid_tweet("Hoi dit is een test")
     True
-    >>> isValidTweet("LONG "* 100 + "TWEET")
+    >>> is_valid_tweet("LONG "* 100 + "TWEET")
     False
-    >>> isValidTweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 7)
+    >>> is_valid_tweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 7)
     False
-    >>> isValidTweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 5)
+    >>> is_valid_tweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 5)
     True
     """
 
     text = text.strip()
     relative_length = len(text)
-    for match in re.findall("https?://[\S]*",text):
+    for match in re.findall(r"https?://[\S]*", text):
         relative_length = relative_length + 23 - len(match)
     return relative_length <= 140 and relative_length > 0
 
 
-def isEmpty(filename):
+def is_empty(filename):
     """Return True if `filename` is empty, otherwise False
 
-    >>> zazu.isEmpty("../tests/emptyfile.txt")
+    >>> zazu.is_empty("../tests/emptyfile.txt")
     True
-    >>> zazu.isEmpty("../tests/badtweets.txt")
+    >>> zazu.is_empty("../tests/badtweets.txt")
     False
     """
     statinfo = os.stat(filename)
     return statinfo.st_size == 0
 
-def getApi(config):
+def get_api(config):
+    """get_api"""
     api = twitter.Api(
         consumer_key=config.get('api', 'consumer_key'),
         consumer_secret=config.get('api', 'consumer_secret'),
@@ -53,8 +53,9 @@ def getApi(config):
     return api
 
 def process_config(config_location):
+    """process_config"""
     # check for configfile
-    if isEmpty(config_location):
+    if is_empty(config_location):
         raise ValueError("The configuration file " + config_location + " is empty")
 
     # read configfile
@@ -63,40 +64,50 @@ def process_config(config_location):
     return config
 
 def enable_logging(config):
-    logfilename = config.get('general','log_file_name')
-    logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',filename=logfilename,level=config.get('general','log_level'))
-    
-def post_tweet(config,tweettext):
+    """enable_logging"""
+    logfilename = config.get('general', 'log_file_name')
+    logging.basicConfig(format='%(asctime)s %(levelname)s: zazu %(message)s',
+                        filename=logfilename,
+                        level=config.get('general', 'log_level'))
+
+def post_tweet(config, tweettext):
+    """post_tweet"""
     try:
-        api = getApi(config)
+        api = get_api(config)
     except twitter.error.TwitterError as error:
-        logging.error("TwitterError: %s",error)
+        logging.error("TwitterError: %s", error)
         sys.exit(1) # do not update the source file
     except Exception as error:
-        logging.error("%s: %s",type(error),error)
+        logging.error("%s: %s", type(error), error)
         sys.exit(1) # do not update the source file
-    randomtime = 60 * random.randrange(0,int(config.get('general','random_time')))
-    logging.info("sleeping for %d seconds (%.2f minutes) before posting tweet",randomtime,randomtime / 60)
-    time.sleep(randomtime)
+        randomtime = 60 * random.randrange(0, int(
+            config.get('general', 'random_time')))
+        logging.info(("sleeping for %d seconds (%.2f minutes)"
+                      " before posting tweet"), randomtime, randomtime / 60)
+        time.sleep(randomtime)
     try:
-        post_update = api.PostUpdate(tweettext,trim_user=True,verify_status_length=True)
+        post_update = api.PostUpdate(tweettext, trim_user=True,
+                                     verify_status_length=True)
     except Exception as error:
-        logging.error("%s: %s",type(error),error)
+        logging.error("%s: %s", type(error), error)
         sys.exit(1) # do not update the source file
-    logging.info("tweeted %s at %s",post_update.text,post_update.created_at)
-    logging.debug("full post_update info: %s",str(post_update))
+        logging.info("tweeted %s at %s", post_update.text,
+                     post_update.created_at)
+        logging.debug("full post_update info: %s", str(post_update))
     return post_update
 
+
 def main():
+    """main"""
     config = process_config(CONFIGFILE)
     enable_logging(config)
-    
-    sourcefilename = config.get('general','source_file_name')
+
+    sourcefilename = config.get('general', 'source_file_name')
 
     tweettext = ""
-    while(not isValidTweet(tweettext) and not isEmpty(sourcefilename)):
+    while not is_valid_tweet(tweettext) and not is_empty(sourcefilename):
         # open linefile, read first line
-        sourcefile = open(sourcefilename,"r")
+        sourcefile = open(sourcefilename, "r")
         tweettext = sourcefile.readline().strip()
 
         # read the tail of the source file, close the file
@@ -104,14 +115,14 @@ def main():
         sourcefile.close()
 
         # process tweet
-        if isValidTweet(tweettext):
+        if is_valid_tweet(tweettext):
             logging.info("Valid tweet text: \"%s\"", tweettext)
-            post_update = post_tweet(config,tweettext)
+            post_tweet(config, tweettext)
         else:
-            logging.error("\"%s\" is not a valid tweet",tweettext)
+            logging.error("\"%s\" is not a valid tweet", tweettext)
 
         # update source file
-        sourcefile = open(sourcefilename,"w")
+        sourcefile = open(sourcefilename, "w")
         sourcefile.write(sourcefile_tail)
         sourcefile.close()
 
