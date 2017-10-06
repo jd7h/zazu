@@ -7,8 +7,7 @@ import sys
 import logging
 import configparser
 import twitter
-
-CONFIGFILE = "config.txt"
+import argparse
 
 def is_valid_tweet(text):
     """
@@ -99,7 +98,12 @@ def post_tweet(config, tweettext):
 
 def main():
     """main"""
-    config = process_config(CONFIGFILE)
+    cmdline = argparse.ArgumentParser(description=u"Python3 Twitter bot")
+    cmdline.add_argument("--config", "-c", required=False, dest="configfile",
+                         help=u"Load this config file", default="config.txt")
+    cmdline_args = cmdline.parse_args()
+
+    config = process_config(cmdline_args.configfile)
     enable_logging(config)
 
     sourcefilename = config.get('general', 'source_file_name')
