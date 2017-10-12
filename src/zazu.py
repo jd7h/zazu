@@ -6,8 +6,8 @@ import re
 import sys
 import logging
 import configparser
-import twitter
 import argparse
+import twitter
 
 def is_valid_tweet(text):
     """
