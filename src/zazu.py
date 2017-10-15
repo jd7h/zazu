@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import random
+import time
 import os
 import re
 import sys
@@ -77,7 +79,11 @@ def post_tweet(config, tweettext):
     except ValueError as error:
         logging.error("get_api %s: %s", type(error), error)
         sys.exit(1) # do not update the source file
-
+        randomtime = 60 * random.randrange(0, int(
+            config.get('general', 'random_time')))
+        logging.info(("sleeping for %d seconds (%.2f minutes)"
+                      " before posting tweet"), randomtime, randomtime / 60)
+        time.sleep(randomtime)
     try:
         post_update = api.PostUpdate(tweettext, trim_user=True,
                                      verify_status_length=True)
@@ -87,6 +93,9 @@ def post_tweet(config, tweettext):
     except ValueError as error:
         logging.error("post_update %s: %s", type(error), error)
         sys.exit(1) # do not update the source file
+        logging.info("tweeted %s at %s", post_update.text,
+                     post_update.created_at)
+        logging.debug("full post_update info: %s", str(post_update))
     return post_update
 
 
