@@ -9,13 +9,15 @@ import configparser
 import argparse
 import twitter
 
+MAX_TWEET_LENGTH = 280
+
 def is_valid_tweet(text):
     """
     >>> is_valid_tweet("Hoi dit is een test")
     True
     >>> is_valid_tweet("LONG "* 100 + "TWEET")
     False
-    >>> is_valid_tweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 7)
+    >>> is_valid_tweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 25)
     False
     >>> is_valid_tweet("https://en.wikipedia.org/wiki/Python_(programming_language " * 5)
     True
@@ -25,7 +27,7 @@ def is_valid_tweet(text):
     relative_length = len(text)
     for match in re.findall(r"https?://[\S]*", text):
         relative_length = relative_length + 23 - len(match)
-    return relative_length <= 140 and relative_length > 0
+    return relative_length <= MAX_TWEET_LENGTH and relative_length > 0
 
 
 def is_empty(filename):
